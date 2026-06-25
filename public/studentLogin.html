@@ -158,7 +158,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e)=>{
     </form>
   </div>
 
-  <script>
+  <!-- <script>
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -185,7 +185,54 @@ document.getElementById("loginForm").addEventListener("submit", async (e)=>{
         console.log(err);
       }
     });
+  </script> -->
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const loginBtn = document.getElementById("studentLoginBtn");
+
+      if (!email || !password) {
+        alert("Please enter email and password.");
+        return;
+      }
+
+      try {
+        loginBtn.disabled = true;
+        loginBtn.innerText = "Logging in...";
+
+        const res = await fetch("/api/student/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Invalid email or password.");
+        }
+
+        const studentId = data.id || data._id || data.student?._id;
+
+        if (!studentId) {
+          throw new Error("Student ID not found in server response.");
+        }
+
+        localStorage.setItem("studentId", studentId);
+        window.location.href = "studentDashboard.html";
+      } catch (err) {
+        alert(err.message || "Server error, try again later.");
+        console.log(err);
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Login";
+      }
+    });
   </script>
+
 
 </body>
 
